@@ -30,12 +30,39 @@ async function loadProfile(){
   $('groupName').textContent=profile.groups?.name||'الإدارة العامة';
   await loadChildren();await loadAudit();
 }
-function roleLabel(r){return ({super_admin:'إدارة عامة',group_admin:'أمين خدمة',servant:'خادم'})[r]||'حساب'}
 async function loadChildren(){
-  const {data,error}=await db.from('children').select('id,full_name,school_grade').order('full_name');
-  if(error){$('childrenList').innerHTML='<p class="muted">لا يمكن تحميل القائمة: '+escapeHtml(error.message)+'</p>';return}
-  childrenCache=data||[];renderChildren(childrenCache);
-  $('attendanceChild').innerHTML=childrenCache.map(c=>`<option value="${c.id}">${escapeHtml(c.full_name)}</option>`).join('');
+  const {data:groups,error:groupsError}=await db
+    .from('groups')
+    .select('id,name')
+    .order('name');
+
+  if(groupsError){
+    msg('childMessage','تعذر تحميل المجموعات: '+groupsError.message);
+    return;
+  }
+
+  $('childGroup').innerHTML =
+    '<option value="">اختر المجموعة</option>' +
+    (groups||[]).map(g =>
+      `<option value="${g.id}">${escapeHtml(g.name)}</option>`
+    ).join('');
+
+  const {data,error}=await db
+    .from('children')
+    .select('id,full_name,school_grade')
+    .order('full_name');
+
+  if(error){
+    $('childrenList').innerHTML='<p class="muted">لا يمكن تحميل القائمة: '+escapeHtml(error.message)+'</p>';
+    return;
+  }
+
+  childrenCache=data||[];
+  renderChildren(childrenCache);
+
+  $('attendanceChild').innerHTML=childrenCache.map(c =>
+    `<option value="${c.id}">${escapeHtml(c.full_name)}</option>`
+  ).join('');
 }
 function renderChildren(items){
   $('childrenList').innerHTML=items.length?items.map(c=>`<div class="item"><div><strong>${escapeHtml(c.full_name)}</strong><small>${escapeHtml(c.school_grade||'')}</small></div></div>`).join(''):'<p class="muted">لا توجد أسماء مسجلة في المجموعة حتى الآن.</p>';
