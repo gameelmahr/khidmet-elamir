@@ -31,21 +31,34 @@ async function loadProfile(){
   await loadChildren();await loadAudit();
 }
 async function loadChildren(){
+  const groupSelect = $('childGroup');
+
+  groupSelect.innerHTML = '<option value="">جاري تحميل المجموعات...</option>';
+
   const {data:groups,error:groupsError}=await db
     .from('groups')
     .select('id,name')
     .order('name');
 
   if(groupsError){
-    msg('childMessage','تعذر تحميل المجموعات: '+groupsError.message);
+    groupSelect.innerHTML = '<option value="">فشل تحميل المجموعات</option>';
+    msg('childMessage','خطأ تحميل المجموعات: '+groupsError.message);
     return;
   }
 
-  $('childGroup').innerHTML =
+  if(!groups || groups.length === 0){
+    groupSelect.innerHTML = '<option value="">لم يتم العثور على مجموعات</option>';
+    msg('childMessage','تم الاتصال بقاعدة البيانات لكن لم تصل أي مجموعات.');
+    return;
+  }
+
+  groupSelect.innerHTML =
     '<option value="">اختر المجموعة</option>' +
-    (groups||[]).map(g =>
+    groups.map(g =>
       `<option value="${g.id}">${escapeHtml(g.name)}</option>`
     ).join('');
+
+  msg('childMessage','تم تحميل '+groups.length+' مجموعات بنجاح.');
 
   const {data,error}=await db
     .from('children')
@@ -63,9 +76,6 @@ async function loadChildren(){
   $('attendanceChild').innerHTML=childrenCache.map(c =>
     `<option value="${c.id}">${escapeHtml(c.full_name)}</option>`
   ).join('');
-}
-function renderChildren(items){
-  $('childrenList').innerHTML=items.length?items.map(c=>`<div class="item"><div><strong>${escapeHtml(c.full_name)}</strong><small>${escapeHtml(c.school_grade||'')}</small></div></div>`).join(''):'<p class="muted">لا توجد أسماء مسجلة في المجموعة حتى الآن.</p>';
 }
 async function loadAudit(){
   const {data,error}=await db.from('audit_logs').select('id,action,table_name,created_at,actor_name').order('created_at',{ascending:false}).limit(50);
