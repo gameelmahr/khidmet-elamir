@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b35">
+  <title>خدمة الأمير</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">✦</div>
+    <div><strong>خدمة الأمير</strong><small>إدارة مدارس الأحد</small></div>
+    <button id="logoutBtn" class="ghost hidden">تسجيل الخروج</button>
+  </header>
+
+  <main>
+    <section id="setupNotice" class="card notice hidden">
+      <h2>خطوة إعداد أولى</h2>
+      <p>قبل تشغيل التطبيق، لازم يتم ربطه بقاعدة بيانات آمنة خاصة بكنيستكم. اتبع ملف <b>دليل التشغيل بالعربي</b> الموجود مع المشروع. لا تضع كلمة مرور قاعدة البيانات هنا.</p>
+    </section>
+
+    <section id="authView" class="auth card hidden">
+      <h1>أهلًا بيك في خدمة الأمير</h1>
+      <p class="muted">سجّل الدخول، أو اطلب إنشاء حساب جديد.</p>
+      <div class="tabs">
+        <button class="tab active" data-tab="login">تسجيل الدخول</button>
+        <button class="tab" data-tab="signup">حساب جديد</button>
+      </div>
+      <form id="loginForm">
+        <label>البريد الإلكتروني<input type="email" id="loginEmail" required autocomplete="username"></label>
+        <label>كلمة المرور<input type="password" id="loginPassword" required autocomplete="current-password"></label>
+        <button class="primary" type="submit">دخول</button>
+      </form>
+      <form id="signupForm" class="hidden">
+        <label>الاسم بالكامل<input id="signupName" required maxlength="100"></label>
+        <label>البريد الإلكتروني<input type="email" id="signupEmail" required></label>
+        <label>كلمة المرور<input type="password" id="signupPassword" required minlength="8"></label>
+        <label>المجموعة المطلوبة
+          <select id="signupGroup" required>
+            <option value="">اختر المجموعة</option>
+            <option value="روضة">روضة</option><option value="حضانة">حضانة</option>
+            <option value="أولى وتانية">أولى وتانية</option><option value="تالتة ورابعة">تالتة ورابعة</option>
+            <option value="خامسة وسادسة">خامسة وسادسة</option><option value="إعدادي">إعدادي</option><option value="ثانوي">ثانوي</option>
+          </select>
+        </label>
+        <p class="hint">الحساب الجديد يظل «في انتظار الموافقة» ولا يمكنه رؤية بيانات الأطفال قبل اعتماد أمين المجموعة أو الإدارة.</p>
+        <button class="primary" type="submit">إرسال طلب التسجيل</button>
+      </form>
+      <p id="authMessage" class="message" role="status"></p>
+    </section>
+
+    <section id="pendingView" class="card hidden">
+      <div class="status-icon">⌛</div><h2>طلبك قيد المراجعة</h2>
+      <p>تم إنشاء الحساب. انتظر موافقة أمين الخدمة أو الإدارة قبل استخدام بيانات المجموعة.</p>
+      <button id="pendingLogout" class="secondary">تسجيل الخروج</button>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="welcome card">
+        <div><span class="muted">مرحبًا</span><h1 id="userName">الخادم</h1><span id="userRole" class="badge"></span></div>
+        <div class="group-chip" id="groupName">المجموعة</div>
+      </div>
+      <nav class="nav">
+        <button class="navbtn active" data-page="children">الأطفال</button>
+        <button class="navbtn" data-page="attendance">الحضور</button>
+        <button class="navbtn" data-page="activity">سجل التعديلات</button>
+      </nav>
+      <section id="childrenPage" class="card page">
+        <div class="section-head"><div><h2>الأطفال</h2><p class="muted">بيانات المجموعة المصرح لك بها فقط</p></div><button id="addChildBtn" class="primary small">＋ إضافة طفل</button></div>
+        <input id="childSearch" class="search" placeholder="ابحث باسم الطفل...">
+        <div id="childrenList" class="list"><p class="muted">جاري تحميل البيانات...</p></div>
+      </section>
+      <section id="attendancePage" class="card page hidden">
+        <h2>تسجيل الحضور</h2><p class="muted">اختر الطفل وسجّل حالة الحضور لهذا اليوم.</p>
+        <form id="attendanceForm">
+          <label>الطفل<select id="attendanceChild" required></select></label>
+          <label>الحالة<select id="attendanceStatus"><option value="present">حاضر</option><option value="absent">غائب</option><option value="excused">غياب بعذر</option></select></label>
+          <label>ملاحظة اختيارية<input id="attendanceNote" maxlength="250"></label>
+          <button class="primary" type="submit">حفظ الحضور</button>
+        </form>
+        <p id="attendanceMessage" class="message"></p>
+      </section>
+      <section id="activityPage" class="card page hidden">
+        <h2>سجل التعديلات</h2><p class="muted">السجل للقراءة فقط، ويظهر حسب صلاحيات حسابك.</p>
+        <div id="auditList" class="list"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="childDialog">
+    <form id="childForm" method="dialog">
+      <div class="section-head"><h2>إضافة طفل</h2><button type="button" id="closeDialog" class="iconbtn">✕</button></div>
+      <label>اسم الطفل بالكامل<input id="childFullName" required maxlength="120"></label>
+      <label>تاريخ الميلاد<input id="childDob" type="date"></label>
+      <label>اسم ولي الأمر<input id="guardianName" maxlength="120"></label>
+      <label>هاتف ولي الأمر<input id="guardianPhone" type="tel" maxlength="25"></label>
+      <label>الصف الدراسي<input id="schoolGrade" maxlength="60"></label>
+      <label>ملاحظات عامة غير حساسة<textarea id="childNotes" maxlength="500"></textarea></label>
+      <p class="hint">لا تسجل تفاصيل اعترافات أو معلومات صحية/شخصية حساسة هنا. أدخل بيانات الأطفال بموافقة ولي الأمر وبحسب سياسة الكنيسة.</p>
+      <button class="primary" type="submit">حفظ الطفل</button>
+      <p id="childMessage" class="message"></p>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <footer>خدمة الأمير · نسخة تأسيسية أولى</footer>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
