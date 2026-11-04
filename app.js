@@ -17,6 +17,13 @@ async function init(){
   else show('authView');
   db.auth.onAuthStateChange((_event,session)=>{if(session) setTimeout(loadProfile,0);else showAuth()});
 }
+function roleLabel(r){
+  return ({
+    super_admin: 'إدارة عامة',
+    group_admin: 'أمين خدمة',
+    servant: 'خادم'
+  })[r] || 'حساب';
+}
 function showAuth(){hide('appView');hide('pendingView');show('authView');show('logoutBtn')}
 async function loadProfile(){
   const {data:{user}}=await db.auth.getUser();currentUser=user;
