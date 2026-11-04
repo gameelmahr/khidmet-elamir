@@ -33,6 +33,13 @@ await loadChildren();
 console.log('انتهى تحميل المجموعات');
 await loadAudit();
 }
+function roleLabel(r){
+  return ({
+    super_admin: 'إدارة عامة',
+    group_admin: 'أمين خدمة',
+    servant: 'خادم'
+  })[r] || 'حساب';
+}
 async function loadChildren(){
   const groupSelect = $('childGroup');
 
