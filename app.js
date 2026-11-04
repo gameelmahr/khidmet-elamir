@@ -28,7 +28,10 @@ async function loadProfile(){
   $('userName').textContent=profile.full_name||'خادم';
   $('userRole').textContent=roleLabel(profile.role);
   $('groupName').textContent=profile.groups?.name||'الإدارة العامة';
-  await loadChildren();await loadAudit();
+  console.log('بدأ تحميل المجموعات');
+await loadChildren();
+console.log('انتهى تحميل المجموعات');
+await loadAudit();
 }
 async function loadChildren(){
   const groupSelect = $('childGroup');
